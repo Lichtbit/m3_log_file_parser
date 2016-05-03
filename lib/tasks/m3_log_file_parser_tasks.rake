@@ -7,12 +7,12 @@ namespace :m3 do
     next if only_env.present? && !Rails.env.to_sym.in?(only_env.map(&:to_sym))
 
     log_path = args[:log_path] || configuration.log_path
-    configuration.run_before if configuration.run_before.respond_to?(:call)
+    configuration.run_before.call if configuration.run_before.respond_to?(:call)
 
     worker = M3LogFileParser::Worker.new(log_path)
     worker.perform
     puts worker.generate_message
 
-    configuration.run_after if configuration.run_after.respond_to?(:call)
+    configuration.run_after.call if configuration.run_after.respond_to?(:call)
   end
 end
