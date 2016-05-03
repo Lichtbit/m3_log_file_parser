@@ -3,7 +3,7 @@ namespace :m3 do
   task :log_file_parser, [:log_path] => :environment do |task, args|
     configuration = Rails.configuration.log_file_parser
     only_env = configuration.only_env
-    only_env = [only_env] unless only_env.is_a?(Array)
+    only_env = [only_env] if only_env.present? && !only_env.is_a?(Array)
     next if only_env.present? && !Rails.env.to_sym.in?(only_env.map(&:to_sym))
 
     log_path = args[:log_path] || configuration.log_path
