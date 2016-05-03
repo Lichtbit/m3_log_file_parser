@@ -1,0 +1,14 @@
+namespace :m3 do
+  desc "parse a given logfile and generate summary"
+  task :log_file_parser, [:log_path] => :environment do |task, args|
+    configuration = Rails.configuration.log_file_parser
+    log_path = args[:log_path] || configuration.log_path
+    configuration.run_before if configuration.run_before.respond_to?(:call)
+
+    worker = M3LogFileParser::Worker.new(log_path)
+    worker.perform
+    puts worker.generate_message
+
+    configuration.run_after if configuration.run_after.respond_to?(:call)
+  end
+end

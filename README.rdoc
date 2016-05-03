@@ -1,0 +1,21 @@
+= m3_log_file_parser
+
+This gem provides a log file parser for rails applications. It parses a file with log tags [:uuid, :domain] and send a summary to stdout.
+
+
+== Install
+
+Add m3_log_file_parser to your Gemfile:
+
+    gem 'm3_log_file_parser', git: 'https://github.com/lichtbit/m3_log_file_parser.git'
+
+Use it in your configuration:
+
+    config.log_file_parser = OpenStruct.new(
+      run_before: -> { `rotate something` },
+      log_path: "/srv/rails/logs/production.log",
+    )
+
+Run it via rake task:
+
+    rake m3:log_file_parser
