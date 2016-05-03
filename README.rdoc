@@ -13,7 +13,8 @@ Use it in your configuration:
 
     config.log_file_parser = OpenStruct.new(
       run_before: -> { `rotate something` },
-      log_path: "/srv/rails/logs/production.log",
+      log_path: "/srv/rails/log/production.log",
+      only_env: [:production],
     )
 
 Run it via rake task:

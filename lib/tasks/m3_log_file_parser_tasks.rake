@@ -2,6 +2,10 @@ namespace :m3 do
   desc "parse a given logfile and generate summary"
   task :log_file_parser, [:log_path] => :environment do |task, args|
     configuration = Rails.configuration.log_file_parser
+    only_env = configuration.only_env
+    only_env = [only_env] unless only_env.is_a?(Array)
+    next if only_env.present? && !Rails.env.to_sym.in?(only_env.map(&:to_sym))
+
     log_path = args[:log_path] || configuration.log_path
     configuration.run_before if configuration.run_before.respond_to?(:call)
 
