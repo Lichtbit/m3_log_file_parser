@@ -2,7 +2,8 @@ require 'net/smtp'
 require 'ostruct'
 
 class M3LogFileParser::Worker < Struct.new(:file_path)
-  attr_accessor :requests, :line_mode, :error_output, :mail_count
+  attr_accessor :requests, :line_mode, :error_output, :mail_count,
+    :routing_errors, :format_errors, :record_not_found_errors, :fatal_errors
 
   def initialize(*args)
     super
@@ -17,6 +18,26 @@ class M3LogFileParser::Worker < Struct.new(:file_path)
 
   def perform
     self.parse
+
+    self.routing_errors = {}
+    self.format_errors = {}
+    self.record_not_found_errors = {}
+
+    self.fatal_errors = []
+    fatal_requests.each do |fatal_request|
+      if fatal_request.type == :routing_error
+        self.routing_errors[fatal_request.to_s] ||= []
+        self.routing_errors[fatal_request.to_s].push(fatal_request.ip)
+      elsif fatal_request.type == :unknown_format
+        self.format_errors[fatal_request.to_s] ||= []
+        self.format_errors[fatal_request.to_s].push(fatal_request.ip)
+      elsif fatal_request.type == :record_not_found
+        self.record_not_found_errors[fatal_request.to_s] ||= []
+        self.record_not_found_errors[fatal_request.to_s].push(fatal_request.ip)
+      else
+        self.fatal_errors.push(fatal_request)
+      end
+    end
   end
 
   def file
@@ -40,27 +61,8 @@ class M3LogFileParser::Worker < Struct.new(:file_path)
   def warn_requests
     requests.values.select(&:warn?)
   end
-  
-  def generate_message
-    routing_errors = {}
-    format_errors = {}
-    record_not_found_errors = {}
 
-    fatal_errors = []
-    fatal_requests.each do |fatal_request|
-      if fatal_request.type == :routing_error
-        routing_errors[fatal_request.to_s] ||= []
-        routing_errors[fatal_request.to_s].push(fatal_request.ip)
-      elsif fatal_request.type == :unknown_format
-        format_errors[fatal_request.to_s] ||= []
-        format_errors[fatal_request.to_s].push(fatal_request.ip)
-      elsif fatal_request.type == :record_not_found
-        record_not_found_errors[fatal_request.to_s] ||= []
-        record_not_found_errors[fatal_request.to_s].push(fatal_request.ip)
-      else
-        fatal_errors.push(fatal_request)
-      end
-    end
+  def generate_message
 
     message = ""
     if fatal_errors.present?
