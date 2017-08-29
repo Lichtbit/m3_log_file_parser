@@ -47,6 +47,8 @@ class M3LogFileParser::Request < Struct.new(:datetime, :pid, :domain)
       :routing_error
     elsif stacktrace.first.match(/^ActionController::UnknownFormat/)
       :unknown_format
+    elsif stacktrace.first.match(/^ActionController::InvalidAuthenticityToken/)
+      :invalid_authenticity_token
     else
       nil
     end
@@ -57,7 +59,7 @@ class M3LogFileParser::Request < Struct.new(:datetime, :pid, :domain)
   end
 
   def to_s
-    if type.in? [:routing_error, :unknown_format, :record_not_found]
+    if type.in? [:routing_error, :unknown_format, :record_not_found, :invalid_authenticity_token]
       messages.first.gsub(/.*"([^"]*)".*/, '\1')
     else
       stacktrace.first || messages.first

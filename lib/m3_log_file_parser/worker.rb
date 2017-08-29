@@ -22,6 +22,7 @@ class M3LogFileParser::Worker < Struct.new(:file_path)
     self.routing_errors = {}
     self.format_errors = {}
     self.record_not_found_errors = {}
+    self.invalid_authenticity_token_errors = {}
 
     self.fatal_errors = []
     fatal_requests.each do |fatal_request|
@@ -34,6 +35,9 @@ class M3LogFileParser::Worker < Struct.new(:file_path)
       elsif fatal_request.type == :record_not_found
         self.record_not_found_errors[fatal_request.to_s] ||= []
         self.record_not_found_errors[fatal_request.to_s].push(fatal_request.ip)
+      elsif fatal_request.type == :invalid_authenticity_token
+        self.invalid_authenticity_token_errors[fatal_request.to_s] ||= []
+        self.invalid_authenticity_token_errors[fatal_request.to_s].push(fatal_request.ip)
       else
         self.fatal_errors.push(fatal_request)
       end
@@ -88,6 +92,14 @@ class M3LogFileParser::Worker < Struct.new(:file_path)
     if record_not_found_errors.present?
       message += "RecordNotFound:\n"
       record_not_found_errors.sort_by {|text, ips| ips.length }.reverse_each do |text, ips|
+        message += "#{ips.length}x #{text} #{ips.join(", ")}\n"
+      end
+      message += "\n\n"
+    end
+
+    if invalid_authenticity_token_errors.present?
+      message += "InvalidAuthenticityToken:\n"
+      invalid_authenticity_token_errors.sort_by {|text, ips| ips.length }.reverse_each do |text, ips|
         message += "#{ips.length}x #{text} #{ips.join(", ")}\n"
       end
       message += "\n\n"
