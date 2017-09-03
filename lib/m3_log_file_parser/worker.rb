@@ -3,7 +3,7 @@ require 'ostruct'
 
 class M3LogFileParser::Worker < Struct.new(:file_path)
   attr_accessor :requests, :line_mode, :error_output, :mail_count,
-    :routing_errors, :format_errors, :record_not_found_errors, :fatal_errors
+    :routing_errors, :format_errors, :record_not_found_errors, :fatal_errors, :invalid_authenticity_token_errors
 
   def initialize(*args)
     super
