@@ -49,6 +49,8 @@ class M3LogFileParser::Request < Struct.new(:datetime, :pid, :domain)
       :unknown_format
     elsif stacktrace.first.match(/^ActionController::InvalidAuthenticityToken/)
       :invalid_authenticity_token
+    elsif stacktrace.first.match(/^ActionController::BadRequest/)
+      :bad_request
     else
       nil
     end
