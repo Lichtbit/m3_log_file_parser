@@ -2,6 +2,7 @@ require 'net/smtp'
 require 'ostruct'
 
 class M3LogFileParser::Worker < Struct.new(:file_path)
+  OUTPUT_LEVELS = { fatal: 4, error: 3, warn: 2, info: 1, all: 0 }
   attr_accessor :requests, :line_mode, :error_output, :mail_count, :defined_errors, :fatal_errors
 
   def initialize(*args)
@@ -19,7 +20,7 @@ class M3LogFileParser::Worker < Struct.new(:file_path)
     %i{routing_error unknown_format record_not_found invalid_authenticity_token bad_request}
   end
 
-  def perform
+  def perform(output_level=nil)
     parse
 
     self.fatal_errors = []
@@ -34,6 +35,8 @@ class M3LogFileParser::Worker < Struct.new(:file_path)
         self.fatal_errors.push(fatal_request)
       end
     end
+
+    puts generate_message if current_level >= OUTPUT_LEVELS.fetch(output_level, 4)
   end
 
   def file
@@ -58,8 +61,14 @@ class M3LogFileParser::Worker < Struct.new(:file_path)
     requests.values.select(&:warn?)
   end
 
-  def generate_message
+  def current_level
+    return 2 if warn_requests.any?
+    return 3 if error_requests.any?
+    return 4 if fatal_errors.any?
+    0
+  end
 
+  def generate_message
     message = ""
     if fatal_errors.present?
       message += "FATALS:\n"

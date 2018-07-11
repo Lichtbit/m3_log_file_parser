@@ -1,22 +1,14 @@
 namespace :m3 do
   desc 'parse a given logfile and generate summary'
   task :log_file_parser, [:log_path] => :environment do |task, args|
-    configuration = Rails.configuration.log_file_parser
-    only_env = configuration.only_env
-    only_env = [only_env] if only_env.present? && !only_env.is_a?(Array)
-    next if only_env.present? && !Rails.env.to_sym.in?(only_env.map(&:to_sym))
+    config = Rails.configuration.log_file_parser
+    return unless config
 
-    log_path = args[:log_path] || configuration.log_path
-    configuration.run_before.call if configuration.run_before.respond_to?(:call)
+    log_path ||= Dir.entries(config.file_path).select do |file|
+      File.file?(File.join(config.file_path, file)) && config.file_pattern.match(file)
+    end.sort.map { |file| File.join(config.file_path, file) }.last
 
-    worker = M3LogFileParser::Worker.new(log_path)
-    worker.perform
-    if configuration.output_if.respond_to?(:call)
-      puts worker.generate_message if configuration.output_if.call(worker)
-    else
-      puts worker.generate_message
-    end
-
-    configuration.run_after.call if configuration.run_after.respond_to?(:call)
+    return puts 'No log file found' if log_path.empty?
+    M3LogFileParser::Worker.new(log_path).perform(config.output_level || :fatal)
   end
 end

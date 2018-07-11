@@ -12,9 +12,9 @@ Add m3_log_file_parser to your Gemfile:
 Use it in your configuration:
 
     config.log_file_parser = OpenStruct.new(
-      run_before: -> { `rotate something` },
-      log_path: "/srv/rails/log/production.log",
-      only_env: [:production],
+      file_path: '/srv/project/shared/log/',
+      file_pattern: /\Aproduction.log-\d{8}\z/,
+      output_level: :warn,
     )
 
 Run it via rake task:
