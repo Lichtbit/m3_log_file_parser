@@ -11,6 +11,11 @@ class M3LogFileParser::LineParser < Struct.new(:worker, :line)
       return
     end
 
+    match = line.match(/\A(?<severity_id>[DIWEFU]),\s\[(?<datetime>[^\]]+)\s#(?<pid>\d+)\]\s+(?<severity_label>[A-Z]+)\s+--\s+[^:]*:\s+\[(?<id>[a-f0-9\-]{36})\]\s\[(?<domain>[^\]]+)\]\s*\z/)
+    if match
+      return
+    end
+
     match = line.match(/\A(?<severity_id>[DIWEFU]),\s\[(?<datetime>[^\]]+)\s#(?<pid>\d+)\]\s+(?<severity_label>[A-Z]+)\s+--\s+[^:]*:\s+\[(?<id>[a-f0-9\-]{36})\]\s\[(?<domain>[^\]]+)\]\s(?<message>.*)\z/)
     if match
       requests[match[:id]] ||= M3LogFileParser::Request.new(match[:datetime], match[:pid], match[:domain])

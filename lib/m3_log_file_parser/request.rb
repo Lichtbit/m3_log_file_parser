@@ -39,21 +39,23 @@ class M3LogFileParser::Request < Struct.new(:datetime, :pid, :domain)
   end
 
   def type
-    if stacktrace.blank?
-      nil
-    elsif stacktrace.first.match("ActiveRecord::RecordNotFound")
+    if match_error("ActiveRecord::RecordNotFound")
       :record_not_found
-    elsif stacktrace.first.match("ActionController::RoutingError")
+    elsif match_error("ActionController::RoutingError")
       :routing_error
-    elsif stacktrace.first.match(/^ActionController::UnknownFormat/)
+    elsif match_error("ActionController::UnknownFormat")
       :unknown_format
-    elsif stacktrace.first.match(/^ActionController::InvalidAuthenticityToken/)
+    elsif match_error("ActionController::InvalidAuthenticityToken")
       :invalid_authenticity_token
-    elsif stacktrace.first.match(/^ActionController::BadRequest/)
+    elsif match_error("ActionController::BadRequest")
       :bad_request
     else
       nil
     end
+  end
+
+  def match_error(error)
+    messages.any? { |message| message.match(error) } || stacktrace.first&.match(error)
   end
 
   def ip
