@@ -66,7 +66,12 @@ class M3LogFileParser::Request < Struct.new(:datetime, :pid, :domain)
     if type.in? [:routing_error, :unknown_format, :record_not_found, :invalid_authenticity_token]
       messages.first.gsub(/.*"([^"]*)".*/, '\1')
     else
-      stacktrace.first || messages.first
+      messages.reject do |message|
+        message.starts_with?("Started ") ||
+        message.starts_with?("Processing by ") ||
+        message.starts_with?("Parameters: ") ||
+        message.starts_with?("Completed ")
+      end.first || stacktrace.first
     end
   end
 end
