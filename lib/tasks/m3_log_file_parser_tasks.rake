@@ -13,7 +13,7 @@ namespace :m3 do
       config = OpenStruct.new(output_level: :warn)
     else
       puts 'Not configured'
-      return
+      next
     end
 
     next puts 'No log file found' if log_path.empty?
