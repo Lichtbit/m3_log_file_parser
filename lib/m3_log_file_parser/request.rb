@@ -70,7 +70,9 @@ class M3LogFileParser::Request < Struct.new(:datetime, :pid, :domain)
         message.starts_with?("Started ") ||
         message.starts_with?("Processing by ") ||
         message.starts_with?("Parameters: ") ||
-        message.starts_with?("Completed ")
+        message.starts_with?("Completed ") ||
+        message.starts_with?("Rendering ") ||
+        message.starts_with?("Rendered ")
       end.first || stacktrace.first
     end
   end
