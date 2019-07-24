@@ -62,9 +62,9 @@ class M3LogFileParser::Worker < Struct.new(:file_path)
   end
 
   def current_level
-    return 2 if warn_requests.any?
-    return 3 if error_requests.any?
     return 4 if fatal_errors.any?
+    return 3 if error_requests.any?
+    return 2 if warn_requests.any?
     0
   end
 
