@@ -1,6 +1,6 @@
 namespace :m3 do
   desc 'parse a given logfile and generate summary'
-  task :log_file_parser, [:log_path] => :environment do |task, args|
+  task :log_file_parser, [:log_path] => :environment do |_task, args|
     log_path = args[:log_path]
     config = nil
     if Rails.configuration.respond_to?(:log_file_parser)
@@ -17,6 +17,7 @@ namespace :m3 do
     end
 
     next puts 'No log file found' if log_path.empty?
+
     M3LogFileParser::Worker.new(log_path).perform(config.output_level || :fatal)
   end
 end

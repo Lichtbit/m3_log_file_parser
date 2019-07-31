@@ -1,20 +1,20 @@
-class M3LogFileParser::Request < Struct.new(:datetime, :pid, :domain)
+M3LogFileParser::Request = Struct.new(:datetime, :pid, :domain) do
   attr_accessor :messages, :current_severity, :stacktrace
   delegate :push, to: :messages
 
   SEVERITIES = {
-    "D" => 1,
-    "I" => 2,
-    "W" => 3,
-    "E" => 4,
-    "F" => 5,
-    "U" => 6,
-  }
+    'D' => 1,
+    'I' => 2,
+    'W' => 3,
+    'E' => 4,
+    'F' => 5,
+    'U' => 6,
+  }.freeze
 
   def initialize(*args)
     super
     self.messages = []
-    self.current_severity = "D"
+    self.current_severity = 'D'
     self.stacktrace = []
   end
 
@@ -23,34 +23,32 @@ class M3LogFileParser::Request < Struct.new(:datetime, :pid, :domain)
   end
 
   def info?
-    current_severity == "I"
+    current_severity == 'I'
   end
 
   def warn?
-    current_severity == "W"
+    current_severity == 'W'
   end
 
   def error?
-    current_severity == "E"
+    current_severity == 'E'
   end
 
   def fatal?
-    current_severity == "F"
+    current_severity == 'F'
   end
 
   def type
-    if match_error("ActiveRecord::RecordNotFound")
+    if match_error('ActiveRecord::RecordNotFound')
       :record_not_found
-    elsif match_error("ActionController::RoutingError")
+    elsif match_error('ActionController::RoutingError')
       :routing_error
-    elsif match_error("ActionController::UnknownFormat")
+    elsif match_error('ActionController::UnknownFormat')
       :unknown_format
-    elsif match_error("ActionController::InvalidAuthenticityToken")
+    elsif match_error('ActionController::InvalidAuthenticityToken')
       :invalid_authenticity_token
-    elsif match_error("ActionController::BadRequest")
+    elsif match_error('ActionController::BadRequest')
       :bad_request
-    else
-      nil
     end
   end
 
@@ -63,22 +61,22 @@ class M3LogFileParser::Request < Struct.new(:datetime, :pid, :domain)
   end
 
   def to_s
-    if type.in? [:routing_error, :unknown_format, :record_not_found, :invalid_authenticity_token]
+    if type.in? %i[routing_error unknown_format record_not_found invalid_authenticity_token]
       messages.first.gsub(/.*"([^"]*)".*/, '\1')
     else
       messages.reject do |message|
-        message.starts_with?("Started ") ||
-        message.starts_with?("Processing by ") ||
-        message.starts_with?("Parameters: ") ||
-        message.starts_with?("Completed ") ||
-        message.starts_with?("Rendering ") ||
-        message.starts_with?("Redirected to") ||
-        message.starts_with?("Rendered ")
+        message.starts_with?('Started ') ||
+          message.starts_with?('Processing by ') ||
+          message.starts_with?('Parameters: ') ||
+          message.starts_with?('Completed ') ||
+          message.starts_with?('Rendering ') ||
+          message.starts_with?('Redirected to') ||
+          message.starts_with?('Rendered ')
       end.first || stacktrace.first
     end
   end
 
   def with_info
-    sprintf("%-15s%s", datetime[5..18], to_s)
+    format('%-15s%s', datetime[5..18], to_s)
   end
 end

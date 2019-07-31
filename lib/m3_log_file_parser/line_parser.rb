@@ -1,8 +1,9 @@
-class M3LogFileParser::LineParser < Struct.new(:worker, :line)
+M3LogFileParser::LineParser = Struct.new(:worker, :line) do
   delegate :requests, to: :worker
 
   def perform
-    return if line.strip == ""
+    return if line.strip == ''
+
     # DEBUG < INFO < WARN < ERROR < FATAL < UNKNOWN
 
     match = line.match(/\ASent\smail\sto/)
@@ -12,9 +13,7 @@ class M3LogFileParser::LineParser < Struct.new(:worker, :line)
     end
 
     match = line.match(/\A(?<severity_id>[DIWEFU]),\s\[(?<datetime>[^\]]+)\s#(?<pid>\d+)\]\s+(?<severity_label>[A-Z]+)\s+--\s+[^:]*:\s+\[(?<id>[a-f0-9\-]{36})\]\s\[(?<domain>[^\]]+)\]\s*\z/)
-    if match
-      return
-    end
+    return if match
 
     match = line.match(/\A(?<severity_id>[DIWEFU]),\s\[(?<datetime>[^\]]+)\s#(?<pid>\d+)\]\s+(?<severity_label>[A-Z]+)\s+--\s+[^:]*:\s+\[(?<id>[a-f0-9\-]{36})\]\s\[(?<domain>[^\]]+)\]\s(?<message>.*)\z/)
     if match

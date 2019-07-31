@@ -1,8 +1,8 @@
 require 'net/smtp'
 require 'ostruct'
 
-class M3LogFileParser::Worker < Struct.new(:file_path)
-  OUTPUT_LEVELS = { fatal: 4, error: 3, warn: 2, info: 1, all: 0 }
+M3LogFileParser::Worker = Struct.new(:file_path) do
+  OUTPUT_LEVELS = { fatal: 4, error: 3, warn: 2, info: 1, all: 0 }.freeze
   attr_accessor :requests, :line_mode, :error_output, :mail_count, :defined_errors, :fatal_errors
 
   def initialize(*args)
@@ -17,10 +17,10 @@ class M3LogFileParser::Worker < Struct.new(:file_path)
   end
 
   def defined_error_types
-    %i{routing_error unknown_format record_not_found invalid_authenticity_token bad_request}
+    %i[routing_error unknown_format record_not_found invalid_authenticity_token bad_request]
   end
 
-  def perform(output_level=nil)
+  def perform(output_level = nil)
     parse
 
     self.fatal_errors = []
@@ -32,7 +32,7 @@ class M3LogFileParser::Worker < Struct.new(:file_path)
         defined_errors[fatal_request.type][fatal_request.to_s] ||= []
         defined_errors[fatal_request.type][fatal_request.to_s].push(fatal_request.ip)
       else
-        self.fatal_errors.push(fatal_request)
+        fatal_errors.push(fatal_request)
       end
     end
 
@@ -45,7 +45,7 @@ class M3LogFileParser::Worker < Struct.new(:file_path)
 
   def parse
     file.read.split("\n").each do |line|
-      self.error_output.push(M3LogFileParser::LineParser.new(self, line).perform)
+      error_output.push(M3LogFileParser::LineParser.new(self, line).perform)
     end
   end
 
@@ -65,11 +65,12 @@ class M3LogFileParser::Worker < Struct.new(:file_path)
     return 4 if fatal_errors.any?
     return 3 if error_requests.any?
     return 2 if warn_requests.any?
+
     0
   end
 
   def generate_message
-    message = ""
+    message = ''
     if fatal_errors.present?
       message += "FATALS:\n"
       message += fatal_errors.map(&:with_info).join("\n")
@@ -82,16 +83,16 @@ class M3LogFileParser::Worker < Struct.new(:file_path)
       message += "\n\n"
     end
 
-    %i{routing_error unknown_format record_not_found invalid_authenticity_token bad_request}
+    %i[routing_error unknown_format record_not_found invalid_authenticity_token bad_request]
 
     defined_error_types.each do |error_type|
-      if defined_errors[error_type].present?
-        message += "#{error_type}:\n"
-        defined_errors[error_type].sort_by {|text, ips| ips.length }.reverse_each do |text, ips|
-          message += "#{ips.length}x #{text} #{ips.join(", ")}\n"
-        end
-        message += "\n\n"
+      next if defined_errors[error_type].blank?
+
+      message += "#{error_type}:\n"
+      defined_errors[error_type].sort_by { |_text, ips| ips.length }.reverse_each do |text, ips|
+        message += "#{ips.length}x #{text} #{ips.join(', ')}\n"
       end
+      message += "\n\n"
     end
 
     if warn_requests.present?
@@ -107,9 +108,7 @@ class M3LogFileParser::Worker < Struct.new(:file_path)
       message += "\n\n"
     end
 
-    if mail_count > 0
-      message += "#{mail_count} mails sent\n\n"
-    end
+    message += "#{mail_count} mails sent\n\n" if mail_count > 0
 
     message
   end
