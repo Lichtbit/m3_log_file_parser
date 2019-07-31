@@ -72,13 +72,13 @@ class M3LogFileParser::Worker < Struct.new(:file_path)
     message = ""
     if fatal_errors.present?
       message += "FATALS:\n"
-      message += fatal_errors.join("\n")
+      message += fatal_errors.map(&:with_info).join("\n")
       message += "\n\n"
     end
 
     if error_requests.present?
       message += "ERRORS:\n"
-      message += error_requests.join("\n")
+      message += error_requests.map(&:with_info).join("\n")
       message += "\n\n"
     end
 

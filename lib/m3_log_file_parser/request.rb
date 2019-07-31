@@ -72,8 +72,13 @@ class M3LogFileParser::Request < Struct.new(:datetime, :pid, :domain)
         message.starts_with?("Parameters: ") ||
         message.starts_with?("Completed ") ||
         message.starts_with?("Rendering ") ||
+        message.starts_with?("Redirected to") ||
         message.starts_with?("Rendered ")
       end.first || stacktrace.first
     end
+  end
+
+  def with_info
+    sprintf("%-15s%s", datetime[5..18], to_s)
   end
 end
