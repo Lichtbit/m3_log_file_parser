@@ -65,7 +65,8 @@ M3LogFileParser::Request = Struct.new(:datetime, :pid, :domain) do
       messages.first.gsub(/.*"([^"]*)".*/, '\1')
     else
       messages.reject do |message|
-        message.starts_with?('Started ') ||
+        message.blank? ||
+          message.starts_with?('Started ') ||
           message.starts_with?('Processing by ') ||
           message.starts_with?('Parameters: ') ||
           message.starts_with?('Completed ') ||

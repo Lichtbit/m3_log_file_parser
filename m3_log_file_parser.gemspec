@@ -3,7 +3,7 @@ $LOAD_PATH.push File.expand_path('lib', __dir__)
 # Describe your gem and declare its dependencies:
 Gem::Specification.new do |s|
   s.name        = 'm3_log_file_parser'
-  s.version     = '0.0.8'
+  s.version     = '0.0.9'
   s.authors     = ['Georg Limbach']
   s.email       = ['georg.limbach@lichtbit.com']
   s.summary     = 'Parser for Rails applications'
