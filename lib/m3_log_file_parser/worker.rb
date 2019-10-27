@@ -17,7 +17,7 @@ M3LogFileParser::Worker = Struct.new(:file_path) do
   end
 
   def defined_error_types
-    %i[routing_error unknown_format record_not_found invalid_authenticity_token bad_request]
+    %i[routing_error unknown_format record_not_found invalid_authenticity_token bad_request invalid_parameter_error]
   end
 
   def perform(output_level = nil)
@@ -82,8 +82,6 @@ M3LogFileParser::Worker = Struct.new(:file_path) do
       message += error_requests.map(&:with_info).join("\n")
       message += "\n\n"
     end
-
-    %i[routing_error unknown_format record_not_found invalid_authenticity_token bad_request]
 
     defined_error_types.each do |error_type|
       next if defined_errors[error_type].blank?

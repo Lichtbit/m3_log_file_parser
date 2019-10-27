@@ -49,6 +49,8 @@ M3LogFileParser::Request = Struct.new(:datetime, :pid, :domain) do
       :invalid_authenticity_token
     elsif match_error('ActionController::BadRequest')
       :bad_request
+    elsif match_error('Rack::QueryParser::InvalidParameterError')
+      :invalid_parameter_error
     end
   end
 
