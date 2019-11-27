@@ -17,7 +17,8 @@ M3LogFileParser::Worker = Struct.new(:file_path) do
   end
 
   def defined_error_types
-    %i[routing_error unknown_format record_not_found invalid_authenticity_token bad_request invalid_parameter_error]
+    %i[routing_error unknown_format record_not_found invalid_authenticity_token bad_request invalid_parameter_error
+       argument_error_invalid_integer]
   end
 
   def perform(output_level = nil)

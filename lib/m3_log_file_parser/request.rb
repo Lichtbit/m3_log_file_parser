@@ -51,11 +51,13 @@ M3LogFileParser::Request = Struct.new(:datetime, :pid, :domain) do
       :bad_request
     elsif match_error('Rack::QueryParser::InvalidParameterError')
       :invalid_parameter_error
+    elsif match_error('ArgumentError (invalid value for Integer():')
+      :argument_error_invalid_integer
     end
   end
 
   def match_error(error)
-    messages.any? { |message| message.match(error) } || stacktrace.first&.match(error)
+    messages.any? { |message| message.include?(error) } || stacktrace.first&.include?(error)
   end
 
   def ip
