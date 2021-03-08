@@ -45,7 +45,7 @@ M3LogFileParser::Worker = Struct.new(:file_path) do
   end
 
   def parse
-    file.read.split("\n").each do |line|
+    file.read.encode('UTF-8', invalid: :replace).split("\n").each do |line|
       error_output.push(M3LogFileParser::LineParser.new(self, line).perform)
     end
   end
